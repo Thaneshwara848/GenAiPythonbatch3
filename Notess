@@ -1,0 +1,18 @@
+LIST            SET             Dict                                Tuple 
+
+[]              {}              {key : value }                      ( )
+
+
+dup             not dup         key can not be dup                  dup ? 
+
+order           no order        yes order                               order ?  
+
+
+easy we can 
+search          add/ delete     we can                              add / remove ? 
+
+
+
+
+
+LIST vs Tuple ?                 

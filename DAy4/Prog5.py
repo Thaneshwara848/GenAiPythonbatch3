@@ -20,7 +20,6 @@ print("Set after removing 20:", number);
 #number.sort();  #not possible in set bcz order is not preserved
 #print("Set after sorting:", number);
 
-
 # Convert Set -> List
 number_list = list(number);
 

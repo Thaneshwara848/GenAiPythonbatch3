@@ -25,11 +25,16 @@ print(fruit)  # Output: ['Blueberry', 'Mango', 'Cherry']
 print("-----------------------");
 for f in fruit:
     print(f)  # Output: Blueberry, Mango, Cherry
+
+
 print("-----------------------");
+
 empty_list = [] # Creating an empty list
+
 for i in range(5):
     name = input("Enter an Employee Name: ")
     empty_list.append(name) # Adding elements to the empty list
+
 print("Employee Names:", empty_list)  # Output: List of employee names entered by the user
 print("-----------------------");
 for i in range(len(empty_list)):
