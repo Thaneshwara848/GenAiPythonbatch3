@@ -1,0 +1,68 @@
+CREATE DATABASE GenAiB3 ;
+use GenAiB3;
+
+CREATE TABLE Employee
+(
+    id  INT,
+    name VARCHAR(20),
+    age  int,
+    salary  int ,
+    desig VARCHAR(20)
+);
+
+select *  from employee;
+INSERT into employee values(111, 'Thanesh' , 30 ,50000, 'Developer');
+select *  from employee;
+
+INSERT into employee values(222, 'Ramesh' , 30 ,50000, 'Clerk');
+INSERT into employee values(333, 'Rajesh' , 40 ,60000, 'Manager');
+INSERT into employee values(444, 'Rakesh' , 50 ,70000, 'Developer');
+
+select *  from employee;
+select *  from employee;
+
+# CREATE
+#insert 
+# select 
+#delete 
+#update 
+
+delete from employee where id =444 ;
+select * from employee ;
+
+DELETE from employee where id in (333,222);
+select * from employee ;
+
+DELETE from employee where name = "Thanesh";
+select * from employee ;
+
+
+INSERT into employee values(111, 'Thanesh' , 30 ,50000, 'Developer');
+INSERT into employee values(222, 'Ramesh' , 30 ,50000, 'Clerk');
+INSERT into employee values(333, 'Rajesh' , 40 ,60000, 'Manager');
+SELECT * from employee ;
+DELETE from employee;
+SELECT * from employee ;
+
+INSERT into employee values(111, 'Thanesh' , 30 ,50000, 'Developer');
+INSERT into employee values(222, 'Ramesh' , 30 ,50000, 'Clerk');
+INSERT into employee values(333, 'Rajesh' , 40 ,60000, 'Manager');
+
+select  * from employee ; 
+
+update employee set salary = 60000 where id =111 ; 
+select * from employee ;
+
+update employee set salary = 60000 where id =222 ;
+select * from employee ;
+update employee set salary = 70000 where id  in ( 111, 222 ) ;
+select * from employee ;
+update employee set salary = 90000;
+select * from employee ;
+
+update employee set salary = 60000, desig='Sr Developer' where id =111 ; 
+
+select * from employee ; 
+
+
+
