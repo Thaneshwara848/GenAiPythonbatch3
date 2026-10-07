@@ -65,4 +65,102 @@ update employee set salary = 60000, desig='Sr Developer' where id =111 ;
 select * from employee ; 
 
 
+--------------------------------------------------------------------------------------------------
+CREATE DATABASE GenAiB3;
+USE GenAiB3;
+
+CREATE TABLE Product(	id INT,	name VARCHAR(30),	 category VARCHAR(30),	price INT,	quantity INT	);
+SELECT * FROM Product;
+INSERT INTO Product VALUES(101, 'Laptop', 'Electronics', 50000, 10);
+SELECT * FROM Product;
+
+INSERT INTO Product VALUEs(102, 'Mobile', 'Electronics', 25000, 20);
+INSERT INTO Product VALUES(103, 'Keyboard', 'Accessories', 1500, 30);
+INSERT INTO Product VALUES(104, 'Mouse', 'Accessories', 800, 40);
+SELECT * FROM Product;
+
+									-- DELETE ONE PRODUCT
+DELETE FROM Product WHERE id = 104;
+SELECT * FROM Product;
+									-- DELETE MULTIPLE PRODUCTS
+DELETE FROM Product	WHERE id IN (102, 103);
+SELECT * FROM Product;
+									-- DELETE USING PRODUCT NAME
+
+DELETE FROM Product	WHERE name = 'Laptop';
+SELECT * FROM Product;
+-- INSERT DATA AGAIN
+INSERT INTO Product VALUES(101, 'Laptop', 'Electronics', 50000, 10);
+INSERT INTO Product VALUES(102, 'Mobile', 'Electronics', 25000, 20);
+INSERT INTO Product VALUES(103, 'Keyboard', 'Accessories', 1500, 30);
+SELECT * FROM Product;
+							-- DELETE ALL PRODUCTS
+DELETE FROM Product;
+SELECT * FROM Product;
+							-- INSERT DATA AGAIN
+
+INSERT INTO Product VALUES(101, 'Laptop', 'Electronics', 50000, 10);
+INSERT INTO Product VALUES(102, 'Mobile', 'Electronics', 25000, 20);
+INSERT INTO Product VALUES(103, 'Keyboard', 'Accessories', 1500, 30);
+SELECT * FROM Product;
+-- UPDATE PRICE
+UPDATE Product	SET price = 55000	WHERE id = 101;
+SELECT * FROM Product;
+-- UPDATE ANOTHER PRODUCT
+UPDATE Product	SET price = 30000	WHERE id = 102;
+
+SELECT * FROM Product;
+
+-- UPDATE MULTIPLE PRODUCTS
+
+UPDATE Product	SET price = 2000	WHERE id IN (102, 103);
+
+SELECT * FROM Product;
+
+
+-- UPDATE ALL PRODUCTS
+
+UPDATE Product	SET quantity = 50;
+
+SELECT * FROM Product;
+
+
+-- UPDATE MULTIPLE COLUMNS
+
+UPDATE Product	SET price = 60000,	category = 'Premium Electronics'	WHERE id = 101;
+
+SELECT * FROM Product;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
