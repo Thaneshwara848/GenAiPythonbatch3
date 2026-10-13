@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Employee Management System</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 28px; background: #f1f5f9; color: #1e293b; font-family: Arial, sans-serif; }
+    .container { max-width: 1050px; margin: auto; }
+    h1 { text-align: center; margin-bottom: 26px; }
+    .card { background: white; padding: 24px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 3px 14px #0f172a12; }
+    .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; }
+    input { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 7px; font: inherit; }
+    button { cursor: pointer; border: 0; border-radius: 7px; padding: 11px 16px; color: white; background: #2563eb; font-weight: bold; }
+    button:hover { filter: brightness(.92); }
+    .secondary { background: #64748b; }
+    .danger { background: #dc2626; }
+    .edit { background: #d97706; }
+    .toolbar, .actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 17px; }
+    .search { max-width: 210px; }
+    .table-wrap { overflow-x: auto; margin-top: 16px; }
+    table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { background: #e2e8f0; }
+    td button { padding: 8px 11px; margin-right: 5px; }
+    #message { min-height: 22px; margin-top: 12px; font-weight: bold; }
+    .success { color: #15803d; }
+    .error { color: #b91c1c; }
+    @media (max-width: 600px) { body { padding: 12px; } .card { padding: 16px; } }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Employee Management System</h1>
+  <section class="card">
+    <h2 id="formTitle">Add Employee</h2>
+    <form id="employeeForm">
+      <div class="fields">
+        <div><label for="id">Employee ID</label><input id="id" type="number" required></div>
+        <div><label for="name">Name</label><input id="name" required></div>
+        <div><label for="age">Age</label><input id="age" type="number" min="0" required></div>
+        <div><label for="salary">Salary</label><input id="salary" type="number" min="0" required></div>
+        <div><label for="desig">Designation</label><input id="desig" required></div>
+      </div>
+      <div class="actions">
+        <button type="submit" id="saveButton">Add Employee</button>
+        <button type="button" class="secondary" onclick="resetForm()">Clear / Cancel</button>
+      </div>
+    </form>
+    <p id="message" role="status"></p>
+  </section>
+
+  <section class="card">
+    <h2>Employee Details</h2>
+    <div class="toolbar">
+      <button onclick="getAllEmployees()">Display All</button>
+      <input class="search" type="number" id="searchId" placeholder="Search Employee ID" aria-label="Search Employee ID">
+      <button onclick="searchEmployee()">Search</button>
+      <button class="danger" onclick="deleteAllEmployees()">Delete All</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Salary</th><th>Designation</th><th>Actions</th></tr></thead>
+        <tbody id="employeeTable"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+<script>
+  let editingId = null;
+  const field = name => document.getElementById(name);
+
+  function showMessage(text, error = false) {
+    const element = field("message");
+    element.textContent = text;
+    element.className = error ? "error" : "success";
+  }
+
+  async function request(url, options = {}) {
+    const response = await fetch(url, options);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.detail || "Request failed");
+    return result;
+  }
+
+  function drawEmployees(employees) {
+    const tbody = field("employeeTable");
+    tbody.replaceChildren();
+    if (employees.length === 0) {
+      const row = tbody.insertRow();
+      const cell = row.insertCell();
+      cell.colSpan = 6;
+      cell.textContent = "No employees found";
+      return;
+    }
+    employees.forEach(emp => {
+      const row = tbody.insertRow();
+      [emp.id, emp.name, emp.age, emp.salary, emp.desig].forEach(value => {
+        const cell = row.insertCell();
+        cell.textContent = value;
+      });
+      const actions = row.insertCell();
+      const edit = document.createElement("button");
+      edit.textContent = "Edit";
+      edit.className = "edit";
+      edit.onclick = () => editEmployee(emp);
+      const del = document.createElement("button");
+      del.textContent = "Delete";
+      del.className = "danger";
+      del.onclick = () => deleteEmployee(emp.id);
+      actions.append(edit, del);
+    });
+  }
+
+  // GET: Display all
+  async function getAllEmployees() {
+    try {
+      const employees = await request("/getAllEmployee");
+      drawEmployees(employees);
+    } catch (error) { showMessage(error.message, true); }
+  }
+
+  // GET: Search by ID
+  async function searchEmployee() {
+    const id = field("searchId").value;
+    if (!id) { showMessage("Enter an employee ID", true); return; }
+    try {
+      const employee = await request(`/getEmployee/${encodeURIComponent(id)}`);
+      drawEmployees([employee]);
+      showMessage("Employee found");
+    } catch (error) { drawEmployees([]); showMessage(error.message, true); }
+  }
+
+  // POST / PUT: Same form for add and update
+  field("employeeForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const params = new URLSearchParams({
+      id: field("id").value,
+      name: field("name").value,
+      age: field("age").value,
+      salary: field("salary").value,
+      desig: field("desig").value
+    });
+    const url = editingId === null
+      ? `/addEmployees?${params}`
+      : `/updateEmployee/${editingId}?${params}`;
+    const method = editingId === null ? "POST" : "PUT";
+    try {
+      const result = await request(url, {method});
+      resetForm();
+      showMessage(result.message);
+      await getAllEmployees();
+    } catch (error) { showMessage(error.message, true); }
+  });
+
+  function editEmployee(emp) {
+    editingId = emp.id;
+    ["id", "name", "age", "salary", "desig"].forEach(key => {
+      field(key).value = emp[key];
+    });
+    field("id").readOnly = true;
+    field("formTitle").textContent = "Update Employee";
+    field("saveButton").textContent = "Update Employee";
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
+
+  function resetForm() {
+    editingId = null;
+    field("employeeForm").reset();
+    field("id").readOnly = false;
+    field("formTitle").textContent = "Add Employee";
+    field("saveButton").textContent = "Add Employee";
+  }
+
+  // DELETE: One employee
+  async function deleteEmployee(id) {
+    if (!confirm(`Delete employee ${id}?`)) return;
+    try {
+      const result = await request(`/deleteEmployee/${id}`, {method: "DELETE"});
+      if (editingId === id) resetForm();
+      showMessage(result.message);
+      await getAllEmployees();
+    } catch (error) { showMessage(error.message, true); }
+  }
+
+  // DELETE: All employees
+  async function deleteAllEmployees() {
+    if (!confirm("Delete ALL employees? This cannot be undone.")) return;
+    try {
+      const result = await request("/deleteAllEmployees", {method: "DELETE"});
+      resetForm();
+      showMessage(result.message);
+      await getAllEmployees();
+    } catch (error) { showMessage(error.message, true); }
+  }
+
+  getAllEmployees();
+</script>
+</body>
+</html>
