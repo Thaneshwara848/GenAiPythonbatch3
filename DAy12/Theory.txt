@@ -1,0 +1,9 @@
+Dev--->Test--->Deploy
+Dev------> AI ----> ML----> 
+
+
+
+Netflix : 
+		Data 
+			M L 
+				suggest 

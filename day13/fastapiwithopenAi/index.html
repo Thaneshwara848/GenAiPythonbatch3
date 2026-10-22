@@ -1,0 +1,1187 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FastAPI OpenAI Chat</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5fa;
+            padding: 50px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px #ddd;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        #answer {
+            margin-top: 25px;
+            padding: 15px;
+            background: #eef5ff;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+        }
+
+        .chat-launcher {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 10;
+            display: grid;
+            place-items: center;
+            width: 60px;
+            height: 60px;
+            margin: 0;
+            padding: 0;
+            border-radius: 50%;
+            background: #0f766e;
+            box-shadow: 0 8px 24px #123b3740;
+        }
+
+        .chat-launcher:hover {
+            background: #115e59;
+        }
+
+        .chat-launcher svg {
+            width: 27px;
+            height: 27px;
+        }
+
+        .chat-widget {
+            position: fixed;
+            right: 24px;
+            bottom: 98px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            width: min(360px, calc(100vw - 32px));
+            height: min(480px, calc(100dvh - 130px));
+            overflow: hidden;
+            border: 1px solid #dbe5e4;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 16px 48px #102a2830;
+        }
+
+        .chat-widget[hidden] {
+            display: none;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 17px;
+            color: white;
+            background: #0f766e;
+        }
+
+        .chat-title {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .chat-close {
+            display: grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            margin: 0;
+            padding: 0;
+            border-radius: 6px;
+            background: transparent;
+        }
+
+        .chat-close:hover {
+            background: #ffffff24;
+        }
+
+        .chat-messages {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .chat-message {
+            max-width: 85%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .chat-message.assistant {
+            align-self: flex-start;
+            background: #eef5f3;
+            color: #173b37;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background: #d8f0ec;
+            color: #123b37;
+        }
+
+        .chat-compose {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 12px;
+            border-top: 1px solid #e5eceb;
+        }
+
+        .chat-compose textarea {
+            min-width: 0;
+            height: 44px;
+            max-height: 100px;
+            resize: vertical;
+            border: 1px solid #cbd8d6;
+            border-radius: 7px;
+            font: inherit;
+        }
+
+        .chat-send {
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
+            margin: 0;
+            padding: 0;
+            border-radius: 7px;
+            background: #0f766e;
+        }
+
+        .chat-send svg {
+            width: 19px;
+            height: 19px;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 16px 100px;
+            }
+
+            .container {
+                padding: 22px;
+            }
+
+            .chat-launcher {
+                right: 16px;
+                bottom: 16px;
+            }
+
+            .chat-widget {
+                right: 16px;
+                bottom: 88px;
+                height: min(480px, calc(100dvh - 112px));
+            }
+        }
+
+        :root {
+            color-scheme: light;
+            --ink: #172b2a;
+            --muted: #6a7b79;
+            --line: #e1e9e6;
+            --paper: #f6f8f5;
+            --teal: #12665e;
+            --teal-deep: #0b4b46;
+            --mint: #dcefe8;
+            --coral: #d66b4c;
+            --gold: #dba84a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            color: var(--ink);
+            background-color: var(--paper);
+            background-image: linear-gradient(#dce6e122 1px, transparent 1px), linear-gradient(90deg, #dce6e122 1px, transparent 1px);
+            background-size: 28px 28px;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+        }
+
+        button, input, select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 72px;
+            padding: 0 max(28px, calc((100vw - 1320px) / 2));
+            border-bottom: 1px solid var(--line);
+            background: #fbfcfaeF;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            color: var(--ink);
+            font-weight: 750;
+            font-size: 17px;
+        }
+
+        .brand-mark {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px 10px 10px 3px;
+            color: white;
+            background: var(--teal);
+        }
+
+        .brand-mark svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .brand small {
+            display: block;
+            margin-top: 2px;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .topbar-meta {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #48a77c;
+            box-shadow: 0 0 0 3px #48a77c20;
+        }
+
+        .app-shell {
+            width: min(1320px, calc(100% - 56px));
+            margin: 0 auto;
+            padding: 46px 0 72px;
+            animation: enter 420ms ease-out both;
+        }
+
+        @keyframes enter {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .eyebrow {
+            margin: 0 0 10px;
+            color: var(--teal);
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .page-heading h1 {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(30px, 4vw, 42px);
+            font-weight: 500;
+            line-height: 1.12;
+        }
+
+        .page-heading p:last-child {
+            margin: 9px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .primary-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            min-height: 44px;
+            padding: 0 17px;
+            border: 0;
+            border-radius: 7px;
+            color: white;
+            background: var(--teal);
+            font-weight: 650;
+            transition: background 140ms ease, transform 140ms ease;
+        }
+
+        .primary-button:hover {
+            background: var(--teal-deep);
+            transform: translateY(-1px);
+        }
+
+        .primary-button svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            margin-bottom: 30px;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            background: #fff;
+        }
+
+        .summary-item {
+            min-height: 110px;
+            padding: 21px 24px;
+            border-right: 1px solid var(--line);
+        }
+
+        .summary-item:last-child {
+            border-right: 0;
+        }
+
+        .summary-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .summary-symbol {
+            width: 7px;
+            height: 7px;
+            border-radius: 2px;
+            background: var(--teal);
+        }
+
+        .summary-item:nth-child(2) .summary-symbol { background: #53a67b; }
+        .summary-item:nth-child(3) .summary-symbol { background: var(--gold); }
+        .summary-item:nth-child(4) .summary-symbol { background: var(--coral); }
+
+        .summary-value {
+            display: block;
+            margin-top: 12px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 31px;
+            line-height: 1;
+        }
+
+        .directory-panel {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            background: #fff;
+        }
+
+        .directory-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 19px 22px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .directory-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .directory-count {
+            margin-left: 7px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .directory-controls {
+            display: flex;
+            gap: 9px;
+        }
+
+        .search-box {
+            position: relative;
+            width: min(260px, 33vw);
+        }
+
+        .search-box svg {
+            position: absolute;
+            top: 11px;
+            left: 11px;
+            width: 17px;
+            height: 17px;
+            color: #82918f;
+            pointer-events: none;
+        }
+
+        .search-box input, .filter-select {
+            width: 100%;
+            height: 40px;
+            border: 1px solid #d6e0dd;
+            border-radius: 6px;
+            outline: none;
+            color: var(--ink);
+            background: #fff;
+            font-size: 13px;
+        }
+
+        .search-box input {
+            padding: 0 12px 0 36px;
+        }
+
+        .filter-select {
+            width: 136px;
+            padding: 0 10px;
+        }
+
+        .search-box input:focus, .filter-select:focus, .form-field input:focus, .form-field select:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px #12665e18;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        .employee-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .employee-table th {
+            padding: 12px 18px;
+            color: #758481;
+            background: #f8faf8;
+            font-size: 10px;
+            font-weight: 750;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .employee-table td {
+            padding: 14px 18px;
+            border-top: 1px solid #edf1ef;
+            color: #425553;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .employee-table tbody tr:hover {
+            background: #fbfdfb;
+        }
+
+        .employee-person {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            min-width: 210px;
+        }
+
+        .employee-avatar {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            flex: 0 0 36px;
+            border-radius: 50%;
+            color: #174640;
+            background: var(--mint);
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        .employee-name {
+            color: var(--ink);
+            font-weight: 650;
+        }
+
+        .employee-email {
+            margin-top: 3px;
+            color: #84928f;
+            font-size: 11px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 9px;
+            border-radius: 20px;
+            color: #26724f;
+            background: #e5f4eb;
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+        .status-badge::before {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            content: "";
+        }
+
+        .status-badge.on-leave { color: #94651b; background: #fbf1d9; }
+        .status-badge.inactive { color: #73807e; background: #edf0ef; }
+
+        .row-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 4px;
+        }
+
+        .icon-button {
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 6px;
+            color: #637471;
+            background: transparent;
+        }
+
+        .icon-button:hover { color: var(--teal-deep); background: #eaf4f0; }
+        .icon-button.delete:hover { color: #b34e37; background: #fff0eb; }
+        .icon-button svg { width: 16px; height: 16px; }
+
+        .empty-state {
+            padding: 54px 20px;
+            color: var(--muted);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .directory-foot {
+            padding: 13px 20px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+            background: #14232180;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-backdrop[hidden] { display: none; }
+
+        .modal-card {
+            width: min(520px, 100%);
+            max-height: min(680px, 100%);
+            overflow-y: auto;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 22px 65px #14232140;
+        }
+
+        .modal-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 22px 24px 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .modal-heading h2 {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .modal-heading p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .modal-close {
+            display: grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            border: 0;
+            border-radius: 6px;
+            color: var(--muted);
+            background: transparent;
+        }
+
+        .modal-close:hover { background: #eef3f0; }
+        .modal-close svg { width: 18px; height: 18px; }
+
+        .employee-form { padding: 20px 24px 24px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-field { display: grid; gap: 7px; }
+        .form-field.full-width { grid-column: 1 / -1; }
+
+        .form-field label {
+            color: #435653;
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .form-field input, .form-field select {
+            width: 100%;
+            height: 42px;
+            padding: 0 11px;
+            border: 1px solid #d6e0dd;
+            border-radius: 6px;
+            outline: none;
+            color: var(--ink);
+            background: #fff;
+            font-size: 13px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
+            margin-top: 22px;
+        }
+
+        .secondary-button {
+            min-height: 42px;
+            padding: 0 15px;
+            border: 1px solid #d6e0dd;
+            border-radius: 6px;
+            color: #455754;
+            background: white;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .form-actions .primary-button { min-height: 42px; }
+
+        .toast {
+            position: fixed;
+            right: 24px;
+            bottom: 96px;
+            z-index: 30;
+            max-width: min(380px, calc(100vw - 32px));
+            padding: 12px 16px;
+            border: 1px solid #d6e4df;
+            border-radius: 7px;
+            color: var(--ink);
+            background: white;
+            box-shadow: 0 8px 28px #102a2820;
+            font-size: 13px;
+        }
+
+        .toast[hidden] { display: none; }
+
+        @media (max-width: 760px) {
+            .topbar { padding: 0 20px; }
+            .app-shell { width: calc(100% - 32px); padding-top: 32px; }
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+            .summary-item:nth-child(2) { border-right: 0; }
+            .summary-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+            .summary-item { min-height: 96px; padding: 17px; }
+            .directory-toolbar { align-items: flex-start; flex-direction: column; gap: 14px; }
+            .directory-controls { width: 100%; }
+            .search-box { width: auto; flex: 1; }
+            .employee-table { min-width: 760px; }
+        }
+
+        @media (max-width: 480px) {
+            .topbar { min-height: 62px; padding: 0 16px; }
+            .topbar-meta { font-size: 10px; }
+            .app-shell { width: calc(100% - 28px); padding-top: 28px; }
+            .page-heading { align-items: flex-start; flex-direction: column; gap: 18px; }
+            .page-heading .primary-button { width: 100%; }
+            .summary-value { font-size: 27px; }
+            .summary-label { font-size: 11px; }
+            .directory-toolbar { padding: 16px; }
+            .filter-select { width: 118px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-field.full-width { grid-column: auto; }
+            .modal-heading, .employee-form { padding-right: 18px; padding-left: 18px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20" />
+                <circle cx="9.5" cy="7" r="4" />
+                <path d="M17 11a4 4 0 1 0-1-7.9M21 20v-1.5a4 4 0 0 0-3-3.9" />
+            </svg>
+        </span>
+        <span>PeopleDesk<small>TEAM OPERATIONS</small></span>
+    </div>
+    <div class="topbar-meta"><span class="connection-dot" aria-hidden="true"></span> LOCAL WORKSPACE</div>
+</header>
+
+<main class="app-shell">
+    <section class="page-heading" aria-labelledby="pageTitle">
+        <div>
+            <p class="eyebrow">People / Directory</p>
+            <h1 id="pageTitle">Team directory</h1>
+            <p>Your people, roles, and team details in one place.</p>
+        </div>
+        <button id="addEmployeeButton" class="primary-button" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            Add employee
+        </button>
+    </section>
+
+    <section class="summary-grid" aria-label="Employee summary">
+        <div class="summary-item"><span class="summary-label"><span class="summary-symbol"></span>Total employees</span><strong id="totalCount" class="summary-value">--</strong></div>
+        <div class="summary-item"><span class="summary-label"><span class="summary-symbol"></span>Active</span><strong id="activeCount" class="summary-value">--</strong></div>
+        <div class="summary-item"><span class="summary-label"><span class="summary-symbol"></span>On leave</span><strong id="leaveCount" class="summary-value">--</strong></div>
+        <div class="summary-item"><span class="summary-label"><span class="summary-symbol"></span>Departments</span><strong id="departmentCount" class="summary-value">--</strong></div>
+    </section>
+
+    <section class="directory-panel" aria-labelledby="directoryTitle">
+        <div class="directory-toolbar">
+            <h2 id="directoryTitle" class="directory-title">All employees <span id="visibleCount" class="directory-count"></span></h2>
+            <div class="directory-controls">
+                <label class="search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" /><path d="m16 16 5 5" /></svg>
+                    <input id="employeeSearch" type="search" placeholder="Search people..." aria-label="Search employees">
+                </label>
+                <select id="statusFilter" class="filter-select" aria-label="Filter by status">
+                    <option value="">All statuses</option>
+                    <option>Active</option>
+                    <option>On leave</option>
+                    <option>Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div class="table-scroll">
+            <table class="employee-table">
+                <thead><tr><th scope="col">Employee</th><th scope="col">Department</th><th scope="col">Job title</th><th scope="col">Status</th><th scope="col">Start date</th><th scope="col" aria-label="Actions"></th></tr></thead>
+                <tbody id="employeeRows"></tbody>
+            </table>
+        </div>
+        <div id="emptyState" class="empty-state" hidden></div>
+        <footer class="directory-foot">Showing <span id="footerCount">0</span> employees</footer>
+    </section>
+</main>
+
+<div id="employeeModal" class="modal-backdrop" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <header class="modal-heading">
+            <div><h2 id="modalTitle">Add employee</h2><p>Enter the employee's details below.</p></div>
+            <button id="closeModalButton" class="modal-close" type="button" aria-label="Close dialog">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+            </button>
+        </header>
+        <form id="employeeForm" class="employee-form">
+            <div class="form-grid">
+                <div class="form-field full-width"><label for="employeeName">Full name</label><input id="employeeName" name="name" maxlength="120" autocomplete="name" required></div>
+                <div class="form-field full-width"><label for="employeeEmail">Work email</label><input id="employeeEmail" name="email" type="email" maxlength="255" autocomplete="email" required></div>
+                <div class="form-field"><label for="employeeDepartment">Department</label><input id="employeeDepartment" name="department" maxlength="100" required></div>
+                <div class="form-field"><label for="employeeTitle">Job title</label><input id="employeeTitle" name="job_title" maxlength="120" required></div>
+                <div class="form-field"><label for="employeeStatus">Status</label><select id="employeeStatus" name="status"><option>Active</option><option>On leave</option><option>Inactive</option></select></div>
+                <div class="form-field"><label for="employeeHireDate">Start date</label><input id="employeeHireDate" name="hire_date" type="date" required></div>
+            </div>
+            <div class="form-actions">
+                <button id="cancelModalButton" class="secondary-button" type="button">Cancel</button>
+                <button id="saveEmployeeButton" class="primary-button" type="submit">Save employee</button>
+            </div>
+        </form>
+    </section>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<section id="chatWidget" class="chat-widget" aria-label="Chat with AI" hidden>
+    <header class="chat-header">
+        <h2 class="chat-title">Chat with AI</h2>
+        <button id="closeChat" class="chat-close" type="button" aria-label="Close chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+        </button>
+    </header>
+    <div id="chatMessages" class="chat-messages" aria-live="polite">
+        <div class="chat-message assistant">Hi! What can I help you with?</div>
+    </div>
+    <form id="chatForm" class="chat-compose">
+        <textarea id="chatInput" aria-label="Your message" placeholder="Type a message..." rows="1" required></textarea>
+        <button id="chatSend" class="chat-send" type="submit" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13" />
+            </svg>
+        </button>
+    </form>
+</section>
+
+<button id="chatLauncher" class="chat-launcher" type="button" aria-label="Open chat" aria-expanded="false" aria-controls="chatWidget">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-2 2v-6.5A7.5 7.5 0 1 1 20 11.5Z" />
+        <path d="M8 11h.01M12 11h.01M16 11h.01" stroke-width="2.5" stroke-linecap="round" />
+    </svg>
+</button>
+
+<script>
+
+const employeeRows = document.getElementById("employeeRows");
+const employeeModal = document.getElementById("employeeModal");
+const employeeForm = document.getElementById("employeeForm");
+const toast = document.getElementById("toast");
+let employeeRecords = [];
+let editingEmployeeId = null;
+let toastTimer;
+
+async function apiRequest(url, options = {}) {
+    const response = await fetch(url, options);
+    const data = response.status === 204 ? null : await response.json();
+    if (!response.ok) throw new Error(data?.detail || "Request failed");
+    return data;
+}
+
+async function loadEmployees() {
+    try {
+        employeeRecords = await apiRequest("/api/employees");
+        renderEmployees();
+    } catch (error) {
+        employeeRows.replaceChildren();
+        document.getElementById("emptyState").hidden = false;
+        document.getElementById("emptyState").textContent = error.message;
+        document.getElementById("footerCount").textContent = "0";
+        document.getElementById("visibleCount").textContent = "(0)";
+        showToast(error.message);
+    }
+}
+
+function renderEmployees() {
+    const search = document.getElementById("employeeSearch").value.trim().toLowerCase();
+    const status = document.getElementById("statusFilter").value;
+    const filtered = employeeRecords.filter((employee) => {
+        const searchable = `${employee.name} ${employee.email} ${employee.department} ${employee.job_title}`.toLowerCase();
+        return searchable.includes(search) && (!status || employee.status === status);
+    });
+
+    document.getElementById("totalCount").textContent = employeeRecords.length;
+    document.getElementById("activeCount").textContent = employeeRecords.filter((employee) => employee.status === "Active").length;
+    document.getElementById("leaveCount").textContent = employeeRecords.filter((employee) => employee.status === "On leave").length;
+    document.getElementById("departmentCount").textContent = new Set(employeeRecords.map((employee) => employee.department)).size;
+    document.getElementById("visibleCount").textContent = `(${filtered.length})`;
+    document.getElementById("footerCount").textContent = filtered.length;
+    document.getElementById("emptyState").hidden = filtered.length > 0;
+    document.getElementById("emptyState").textContent = employeeRecords.length ? "No employees match your search." : "No employees yet. Add your first team member to get started.";
+    employeeRows.replaceChildren(...filtered.map(createEmployeeRow));
+}
+
+function createEmployeeRow(employee) {
+    const row = document.createElement("tr");
+    const personCell = document.createElement("td");
+    const person = document.createElement("div");
+    person.className = "employee-person";
+    const avatar = document.createElement("span");
+    avatar.className = "employee-avatar";
+    avatar.textContent = employee.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+    const personCopy = document.createElement("div");
+    const name = document.createElement("div");
+    name.className = "employee-name";
+    name.textContent = employee.name;
+    const email = document.createElement("div");
+    email.className = "employee-email";
+    email.textContent = employee.email;
+    personCopy.append(name, email);
+    person.append(avatar, personCopy);
+    personCell.append(person);
+    row.append(personCell, textCell(employee.department), textCell(employee.job_title));
+
+    const statusCell = document.createElement("td");
+    const badge = document.createElement("span");
+    badge.className = `status-badge ${employee.status.toLowerCase().replaceAll(" ", "-")}`;
+    badge.textContent = employee.status;
+    statusCell.append(badge);
+    row.append(statusCell, textCell(formatDate(employee.hire_date)));
+
+    const actionsCell = document.createElement("td");
+    const actions = document.createElement("div");
+    actions.className = "row-actions";
+    const editButton = actionButton("Edit employee", "edit");
+    editButton.addEventListener("click", () => openEmployeeModal(employee));
+    const deleteButton = actionButton("Delete employee", "delete");
+    deleteButton.classList.add("delete");
+    deleteButton.addEventListener("click", () => removeEmployee(employee));
+    actions.append(editButton, deleteButton);
+    actionsCell.append(actions);
+    row.append(actionsCell);
+    return row;
+}
+
+function textCell(value) {
+    const cell = document.createElement("td");
+    cell.textContent = value;
+    return cell;
+}
+
+function actionButton(label, kind) {
+    const button = document.createElement("button");
+    button.className = "icon-button";
+    button.type = "button";
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    button.innerHTML = kind === "edit"
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m14 5 5 5M4 20l4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z" /></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3" /></svg>';
+    return button;
+}
+
+function formatDate(value) {
+    if (!value) return "—";
+    return new Date(`${value}T12:00:00`).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+function openEmployeeModal(employee = null) {
+    editingEmployeeId = employee?.employee_id ?? null;
+    employeeForm.reset();
+    document.getElementById("modalTitle").textContent = employee ? "Edit employee" : "Add employee";
+    document.getElementById("saveEmployeeButton").textContent = employee ? "Save changes" : "Save employee";
+    document.getElementById("employeeHireDate").value = employee?.hire_date || new Date().toISOString().slice(0, 10);
+    if (employee) {
+        for (const field of ["name", "email", "department", "job_title", "status"]) {
+            employeeForm.elements[field].value = employee[field];
+        }
+    }
+    employeeModal.hidden = false;
+    document.getElementById("employeeName").focus();
+}
+
+function closeEmployeeModal() {
+    employeeModal.hidden = true;
+    editingEmployeeId = null;
+    document.getElementById("addEmployeeButton").focus();
+}
+
+function showToast(message) {
+    toast.textContent = message;
+    toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toast.hidden = true; }, 4000);
+}
+
+async function removeEmployee(employee) {
+    if (!window.confirm(`Delete ${employee.name} from the directory?`)) return;
+    try {
+        await apiRequest(`/api/employees/${employee.employee_id}`, { method: "DELETE" });
+        showToast(`${employee.name} was removed.`);
+        await loadEmployees();
+    } catch (error) {
+        showToast(error.message);
+    }
+}
+
+document.getElementById("addEmployeeButton").addEventListener("click", () => openEmployeeModal());
+document.getElementById("closeModalButton").addEventListener("click", closeEmployeeModal);
+document.getElementById("cancelModalButton").addEventListener("click", closeEmployeeModal);
+document.getElementById("employeeSearch").addEventListener("input", renderEmployees);
+document.getElementById("statusFilter").addEventListener("change", renderEmployees);
+employeeModal.addEventListener("click", (event) => {
+    if (event.target === employeeModal) closeEmployeeModal();
+});
+
+employeeForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = document.getElementById("saveEmployeeButton");
+    const employee = Object.fromEntries(new FormData(employeeForm));
+    button.disabled = true;
+    try {
+        await apiRequest(editingEmployeeId ? `/api/employees/${editingEmployeeId}` : "/api/employees", {
+            method: editingEmployeeId ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(employee)
+        });
+        employeeModal.hidden = true;
+        showToast(editingEmployeeId ? "Employee details updated." : "Employee added to the directory.");
+        editingEmployeeId = null;
+        await loadEmployees();
+        document.getElementById("addEmployeeButton").focus();
+    } catch (error) {
+        showToast(error.message);
+    } finally {
+        button.disabled = false;
+    }
+});
+
+loadEmployees();
+
+const chatWidget = document.getElementById("chatWidget");
+const chatLauncher = document.getElementById("chatLauncher");
+const chatInput = document.getElementById("chatInput");
+const chatMessages = document.getElementById("chatMessages");
+const chatSend = document.getElementById("chatSend");
+
+chatLauncher.addEventListener("click", () => {
+    const isOpen = chatWidget.hidden;
+    chatWidget.hidden = !isOpen;
+    chatLauncher.setAttribute("aria-expanded", String(isOpen));
+    if (isOpen) chatInput.focus();
+});
+
+document.getElementById("closeChat").addEventListener("click", () => {
+    chatWidget.hidden = true;
+    chatLauncher.setAttribute("aria-expanded", "false");
+    chatLauncher.focus();
+});
+
+document.getElementById("chatForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const prompt = chatInput.value.trim();
+    if (!prompt || chatSend.disabled) return;
+
+    addChatMessage(prompt, "user");
+    chatInput.value = "";
+    chatSend.disabled = true;
+    const pendingMessage = addChatMessage("Thinking...", "assistant");
+
+    try {
+        const response = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Request failed");
+        pendingMessage.textContent = data.answer;
+    } catch (error) {
+        pendingMessage.textContent = "Sorry, something went wrong: " + error.message;
+    } finally {
+        chatSend.disabled = false;
+        chatInput.focus();
+    }
+});
+
+function addChatMessage(text, role) {
+    const message = document.createElement("div");
+    message.className = "chat-message " + role;
+    message.textContent = text;
+    chatMessages.appendChild(message);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return message;
+}
+
+async function askAI() {
+
+    let question = document.getElementById("question").value.trim();
+    let answer = document.getElementById("answer");
+    let button = document.getElementById("askButton");
+
+    if (question === "") {
+        alert("Please enter a question");
+        return;
+    }
+
+    answer.innerText = "AI is thinking...";
+    button.disabled = true;
+
+    try {
+        let response = await fetch("/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                prompt: question
+            })
+        });
+
+        let data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || "Request failed");
+        }
+
+        answer.innerText = data.answer;
+
+    } catch (error) {
+        answer.innerText = "Error: " + error.message;
+    } finally {
+        button.disabled = false;
+    }
+}
+
+</script>
+
+</body>
+</html>
