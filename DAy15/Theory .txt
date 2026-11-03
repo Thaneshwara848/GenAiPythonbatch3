@@ -8,9 +8,34 @@ LLM :
 	
 Types of LLM : 
 	GPT    --> open AI ---> Text gen / coding / reasoning , chat 
+		  --> versions					Approx cost 		Approx. INR
+			GPT-4.1 Nano------------------>		$0.0035			0.31
+			GPT-4.1 Mini------------------>		$0.0142			₹1.25
+												------ 
+												90%+ no color + 2 bm
+			GPT-4.1----------------------->		$0.0708			₹6.23
+			GPT-5.6 Luna------------------>		$0.0094			₹0.83
+												95 +  color full +  3 bm trainup
+			GPT-5.6 Sol------------------->		$0.1649			₹14.51
+												98 + attrcatcive_ color full + fast + 4 billons 
+
 	Llama  --> Meta   ----> free / we can download and we can use 
 	Gemini --> Google ---->multimode AI and reasoning
 	Claude --> Anthropic---> writing , Analysis  , coding  
+	Co-pilot 
+
+
+					
+			
+
+
+
+
+
+
+
+
+
 
 --------------------------------------------- Ex ---------------------
 write a python program to add  2 number 
@@ -31,17 +56,83 @@ how its works
 		Step 5 : Final Response 			answer 
 
 LLM : 
-		it can answer out question 
+		it can answer our question 
 		it can generate the code / any lang 
 		it can translate lang 
 		it can summarize the document
-		it can write a mail 
+		it can write a email 
 		it can explain complex technical concept  
 		it can act as AI chat bot
 		it text----- convert----> audio/ video / image / pdf  
+-----------------------------------------------------------------------------------
 
-AI --- ML ---- DL ----- Gen AI ---- Agentic AI 
-					------------------------------- keywords-----------------------------------
+AI Developer :
+ 
+AI --- ML ---- DL ----- 
+			-----LLM ---->Gen AI(text , Audio , video , Report) ----> Agentic AI 
+
+
+vechical : 
+		Automatic car : 
+				AI -- ML -- 
+Hospital : 
+		AI : 
+			
+banking : 	AI/ --- > Chatbot ? , Fruaud Detection , FAceRec , , FIn Assistance  , report , 
+
+Eduction : 	AI/Ml --- >byjus--> perfo predict , Quiz ....> handwriing predit , perfo--> question paper 
+			
+		KEA --PDO , VA , KAS, UPSC , KPSC , KSP 
+		 
+	
+Agricatural : 	AI /Ml --- Smart ittigation ! , crop yield prediction  , plants Disease Detect , AI Farming 
+E commence 
+Automobiles 
+Cybersecurity 
+manufacturing 
+Entertainment 
+Transpiration 
+HR 	: 
+Real Estate 
+Customer Support 
+Software Developer 
+
+
+
+Kashmir 5-Day Trip Plan from Bengaluru\
+
+AI /ML / DL -----> LLM (Open/gemini / lama / etc....!)----> GenAI 
+GenAI ------------------------- > text , audio, vid , etc...!
+
+----------------------------------------prompt Engineering----------------------
+	Types : 
+		Zero Shot prompting
+		One Shot prompting 
+		few Shot prompting 
+		Role based prompting
+		Chain of Thought 
+		Constraint Based 
+		Step by Step prompting
+		Instruction Based prompting
+		Output based  prompting
+		negative prompting
+
+
+
+
+				Data Base ....!
+			MYSQL / oracle / MongoDB 
+
+popularity 			
+performance 	
+Cost 
+Security 
+Integrate 
+Readability 
+Vendor Support 
+
+
+------------------------------- keywords-----------------------------------
 Tokens 
 Tokenization
 Embedding 
@@ -59,25 +150,65 @@ fine tuning
 	vectors 
 	Similarities Search 
 	Semantic Search  
-----------------------------------------prompt Engineering----------------------
-	Types : 
-		Zero Shot prompting
-		One Shot prompting 
-		few Shot prompting 
-		Role based prompting
-		Chain of Thought 
-		Constraint Based 
-		Step by Step prompting
-		Instruction Based prompting
-		Output based  prompting
-		negative prompting
+
 -------------------------n8n --------------------- 
 Automation--------- >
 ----------------------------- Agentic AI -------------
 Single Agent
 Multiagent 
 MCP 
-Freamworks : lang Chain / lang graph 
+Frameworks : lang Chain / lang graph 
+					best Prompt ----> AI 
+								Commination /
+								Accurately 
+
+1 ----- Accurent 
+1 --2 ---3 ---4 ---5 --- >Accurate Answer  ! 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+accurate      accurate 
+1000 ----- > 10,000
+
+
+tell in one line what they suppose to do with prompt ? 
+
+
+1000 token ----- summrize---- 50 token ....!
+
+
+input --->		more	less 
+output--->		less	more 
+
+
+
+
+
+A		- 10000 ---10
+B		100000=----15
+C		1000000-----20 
+D		100000----25 ---------->
+
+
+
+
+
+
+
+
+
+
 
 
 

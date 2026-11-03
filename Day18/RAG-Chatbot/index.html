@@ -1,0 +1,520 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1">
+
+<title>FastAPI RAG Chatbot</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f6fb;
+    color: #192b45;
+}
+
+.app {
+    max-width: 950px;
+    height: 100vh;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    box-shadow: 0 0 30px #dfe5ef;
+}
+
+header {
+    padding: 18px 25px;
+    background: #162b50;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h2 {
+    margin: 0;
+}
+
+header small {
+    color: #bdcce4;
+}
+
+.document-bar {
+    background: #eaf0ff;
+    padding: 12px 20px;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.document-bar button {
+    border: none;
+    background: transparent;
+    color: #d42f45;
+    cursor: pointer;
+}
+
+.chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message {
+    padding: 13px 17px;
+    border-radius: 14px;
+    max-width: 80%;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.6;
+}
+
+.bot {
+    background: #eef2f9;
+    align-self: flex-start;
+}
+
+.user {
+    background: #2463dc;
+    color: white;
+    align-self: flex-end;
+}
+
+.sources {
+    display: block;
+    margin-top: 8px;
+    font-size: 11px;
+    opacity: .7;
+}
+
+.composer {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 18px;
+    border-top: 1px solid #ddd;
+}
+
+#question {
+    flex: 1;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid #ccd5e3;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+button {
+    cursor: pointer;
+}
+
+.upload-btn {
+    padding: 12px;
+    background: #e8f0ff;
+    color: #2053b5;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.send-btn {
+    background: #2463dc;
+    color: white;
+    border: none;
+    padding: 14px 22px;
+    border-radius: 9px;
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+#status {
+    padding: 0 20px 10px;
+    color: #62758c;
+    font-size: 12px;
+    min-height: 24px;
+}
+
+@media (max-width: 600px) {
+    .composer {
+        flex-wrap: wrap;
+    }
+
+    #question {
+        order: -1;
+        flex-basis: 100%;
+    }
+
+    .message {
+        max-width: 95%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <header>
+        <div>
+            <h2>AI RAG Chatbot</h2>
+            <small>FastAPI + OpenAI</small>
+        </div>
+        <span>● Online</span>
+    </header>
+
+    <div class="document-bar">
+        <span id="documentNames">
+            No documents uploaded
+        </span>
+
+        <button onclick="clearDocuments()">
+            Clear Documents
+        </button>
+    </div>
+
+    <div id="chatBox" class="chat-box">
+
+        <div class="message bot">
+            Hello! I am your RAG Assistant.
+
+            Upload a document using the + button,
+            then ask questions about its content.
+        </div>
+
+    </div>
+
+    <form id="chatForm" class="composer">
+
+        <label for="fileInput" class="upload-btn">
+            + Upload Document
+        </label>
+
+        <input
+            id="fileInput"
+            type="file"
+            accept=".pdf,.docx,.txt"
+            hidden
+        >
+
+        <input
+            type="text"
+            id="question"
+            placeholder="Ask a question about your document..."
+            required
+        >
+
+        <button
+            id="sendBtn"
+            type="submit"
+            class="send-btn">
+            Send
+        </button>
+
+    </form>
+
+    <div id="status"></div>
+
+</div>
+
+<script>
+
+// ------------------------------------
+// 1. ELEMENTS AND CHAT HISTORY
+// ------------------------------------
+
+const chatBox = document.getElementById("chatBox");
+const questionInput = document.getElementById("question");
+const fileInput = document.getElementById("fileInput");
+const sendBtn = document.getElementById("sendBtn");
+const statusBox = document.getElementById("status");
+
+let history = [];
+let busy = false;
+
+
+// ------------------------------------
+// 2. ADD CHAT MESSAGE
+// ------------------------------------
+
+function addMessage(text, type, sources = []) {
+
+    const div = document.createElement("div");
+
+    div.className = "message " + type;
+
+    // textContent prevents HTML injection
+    div.textContent = text;
+
+    if (sources.length > 0) {
+
+        const source = document.createElement("span");
+        source.className = "sources";
+
+        source.textContent =
+            "Sources: " + sources.join(", ");
+
+        div.appendChild(source);
+    }
+
+    chatBox.appendChild(div);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+
+// ------------------------------------
+// 3. SET BUSY STATE
+// ------------------------------------
+
+function setBusy(value, message = "") {
+
+    busy = value;
+
+    sendBtn.disabled = value;
+    fileInput.disabled = value;
+    questionInput.disabled = value;
+
+    statusBox.textContent = message;
+}
+
+
+// ------------------------------------
+// 4. UPLOAD DOCUMENT
+// ------------------------------------
+
+fileInput.addEventListener(
+    "change",
+    async function () {
+
+        const file = fileInput.files[0];
+
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Maximum file size is 5 MB");
+            fileInput.value = "";
+            return;
+        }
+
+        const formData = new FormData();
+
+        formData.append("file", file);
+
+        setBusy(true, "Uploading " + file.name);
+
+        try {
+
+            const response = await fetch("/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || "Upload failed");
+            }
+
+            // Do not reuse old history with new documents
+            history = [];
+
+            addMessage(
+                "Document uploaded: " +
+                data.filename +
+                "\nChunks created: " +
+                data.chunks,
+                "bot"
+            );
+
+            await loadDocuments();
+
+        } catch (error) {
+
+            addMessage(
+                "Upload error: " + error.message,
+                "bot"
+            );
+
+        } finally {
+
+            fileInput.value = "";
+            setBusy(false);
+        }
+    }
+);
+
+
+// ------------------------------------
+// 5. CHAT WITH RAG
+// ------------------------------------
+
+document.getElementById("chatForm")
+    .addEventListener("submit", async function (event) {
+
+        event.preventDefault();
+
+        if (busy) return;
+
+        const question = questionInput.value.trim();
+
+        if (!question) return;
+
+        addMessage(question, "user");
+
+        questionInput.value = "";
+
+        setBusy(true, "AI is thinking...");
+
+        try {
+
+            const response = await fetch("/chat", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    question: question,
+                    history: history
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || "Chat failed");
+            }
+
+            addMessage(
+                data.answer,
+                "bot",
+                data.sources || []
+            );
+
+            history.push({
+                role: "user",
+                content: question
+            });
+
+            history.push({
+                role: "assistant",
+                content: data.answer
+            });
+
+            // Keep only recent conversation
+            history = history.slice(-6);
+
+        } catch (error) {
+
+            addMessage(
+                "Error: " + error.message,
+                "bot"
+            );
+
+        } finally {
+
+            setBusy(false);
+            questionInput.focus();
+        }
+    });
+
+
+// ------------------------------------
+// 6. LIST DOCUMENTS
+// ------------------------------------
+
+async function loadDocuments() {
+
+    const response = await fetch("/documents");
+
+    const data = await response.json();
+
+    const label = document.getElementById(
+        "documentNames"
+    );
+
+    if (data.documents.length === 0) {
+
+        label.textContent = "No documents uploaded";
+
+    } else {
+
+        label.textContent =
+            "Documents: " + data.documents.join(", ");
+    }
+}
+
+
+// ------------------------------------
+// 7. CLEAR DOCUMENTS
+// ------------------------------------
+
+async function clearDocuments() {
+
+    if (busy) return;
+
+    if (!confirm("Remove all uploaded documents?")) {
+        return;
+    }
+
+    setBusy(true, "Removing documents...");
+
+    try {
+
+        const response = await fetch("/documents", {
+            method: "DELETE"
+        });
+
+        if (!response.ok) {
+            throw new Error("Unable to clear documents");
+        }
+
+        history = [];
+
+        addMessage(
+            "Documents cleared. Upload a new document.",
+            "bot"
+        );
+
+        await loadDocuments();
+
+    } catch (error) {
+
+        addMessage(error.message, "bot");
+
+    } finally {
+
+        setBusy(false);
+    }
+}
+
+
+// ------------------------------------
+// 8. INITIALIZE
+// ------------------------------------
+
+loadDocuments();
+
+</script>
+
+</body>
+</html>
