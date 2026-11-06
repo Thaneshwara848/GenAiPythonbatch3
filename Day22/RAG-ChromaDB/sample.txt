@@ -1,0 +1,5 @@
+Python is a programming language.
+FastAPI is used to develop REST APIs.
+MySQL is used to store employee records.
+ChromaDB is a vector database used to store embeddings.
+RAG uses documents to retrieve relevant information.

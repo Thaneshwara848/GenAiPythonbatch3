@@ -1,0 +1,4 @@
+Python is a programming language.
+Python is used for web development.
+FastAPI is a Python framework.
+MySQL is a relational database.
