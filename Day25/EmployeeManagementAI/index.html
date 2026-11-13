@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Employee Management | AI Tool Calling</title>
+  <style>
+    :root {
+      --blue: #2563eb;
+      --ink: #17243b;
+      --bg: #eef3fa;
+      --line: #dce4ef;
+      --green: #167a50;
+      --red: #c13737;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Segoe UI, Arial, sans-serif;
+    }
+
+    header {
+      background: #172f58;
+      color: white;
+      padding: 16px 26px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    header span {
+      font-size: 13px;
+      color: #c7d7ef;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(400px, 1.2fr) minmax(320px, 0.8fr);
+      gap: 16px;
+      padding: 16px;
+      max-width: 1600px;
+      margin: auto;
+    }
+
+    section {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 3px 12px #17365a0a;
+      padding: 18px;
+      min-width: 0;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 19px;
+    }
+
+    h3 {
+      margin: 14px 0 9px;
+      font-size: 16px;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid #b9c7d9;
+      border-radius: 7px;
+      padding: 10px;
+      font: inherit;
+      font-size: 14px;
+    }
+
+    input:focus {
+      outline: 2px solid #adcafb;
+      border-color: var(--blue);
+    }
+
+    button {
+      border: 0;
+      border-radius: 7px;
+      padding: 10px 13px;
+      background: var(--blue);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover {
+      filter: brightness(.93);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    button.secondary {
+      background: #e7edf6;
+      color: #243b59;
+    }
+
+    button.danger {
+      background: var(--red);
+    }
+
+    button.success {
+      background: var(--green);
+    }
+
+    button.small {
+      padding: 6px 9px;
+      font-size: 12px;
+      margin: 2px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .table-scroll {
+      width: 100%;
+      overflow: auto;
+      max-height: 385px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    th,
+    td {
+      padding: 11px 9px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    th {
+      background: #eff4fc;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .status {
+      font-size: 13px;
+      min-height: 20px;
+      margin: 12px 0 0;
+      color: var(--green);
+    }
+
+    .status.error {
+      color: var(--red);
+    }
+
+    .chat-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 590px;
+      height: calc(100vh - 118px);
+      max-height: 850px;
+    }
+
+    .hint {
+      color: #61738c;
+      font-size: 12px;
+      margin: -8px 0 10px;
+    }
+
+    #chatMessages {
+      flex: 1;
+      overflow-y: auto;
+      background: #f7f9fd;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      min-height: 240px;
+    }
+
+    .msg {
+      max-width: 92%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      line-height: 1.5;
+      font-size: 14px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .msg.user {
+      margin-left: auto;
+      background: #dce9ff;
+    }
+
+    .msg.assistant {
+      margin-right: auto;
+      background: white;
+      border: 1px solid #e1e8f2;
+    }
+
+    .chat-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .chat-controls input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .confirm-box {
+      border: 1px solid #f2d494;
+      background: #fff8e7;
+      border-radius: 10px;
+      padding: 11px;
+      margin: 10px 0;
+    }
+
+    .confirm-box pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 12px;
+    }
+
+    .confirm-box .buttons {
+      margin-top: 7px;
+    }
+
+    .full {
+      grid-column: span 2;
+    }
+
+    @media(max-width:920px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .chat-panel {
+        height: 620px;
+      }
+    }
+
+    @media(max-width:480px) {
+      .fields {
+        grid-template-columns: 1fr;
+      }
+
+      .full {
+        grid-column: span 1;
+      }
+
+      header h1 {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Employee Management System</h1><span>FastAPI + MySQL + OpenAI Tool Calling | No frontend framework</span>
+  </header>
+  <main>
+    <section>
+      <h2>Employee Form</h2>
+      <form id="employeeForm">
+        <div class="fields">
+          <div><label for="id">Employee ID</label><input id="id" type="number" min="1" required /></div>
+          <div><label for="name">Name</label><input id="name" minlength="2" maxlength="60" required /></div>
+          <div><label for="age">Age</label><input id="age" type="number" min="18" max="100" required /></div>
+          <div><label for="salary">Salary (₹)</label><input id="salary" type="number" min="0" required /></div>
+          <div class="full"><label for="desig">Designation</label><input id="desig" minlength="2" maxlength="60"
+              required /></div>
+        </div>
+        <div class="buttons">
+          <button type="submit" id="saveButton">Add Employee</button>
+          <button type="button" class="secondary" id="clearButton">Clear / Cancel Edit</button>
+        </div>
+      </form>
+      <p id="formStatus" class="status" role="status"></p>
+      <div class="toolbar">
+        <h3>Employee Records</h3><button type="button" class="secondary" id="refreshButton">↻ Refresh</button>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Salary</th>
+              <th>Designation</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="employeeRows">
+            <tr>
+              <td colspan="6">Loading employees...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="chat-panel">
+      <h2>AI Employee Chatbot</h2>
+      <p class="hint">Try: “Show all employees”, “Get employee 101”, “Add Kiran with ID 101, age 28, salary 50000,
+        designation Developer”</p>
+      <div id="chatMessages" aria-live="polite"></div>
+      <div id="confirmArea"></div>
+      <form id="chatForm" class="chat-controls">
+        <input id="chatInput" placeholder="Ask about your employees..." aria-label="Chat message" maxlength="4000"
+          required />
+        <button id="sendButton" type="submit">Send</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let editingId = null;
+    let employees = [];
+    let history = [];
+    let pendingToken = null;
+    let busy = false;
+
+    // A single helper handles JSON responses and useful error messages.
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {'Content-Type': 'application/json', ...(options.headers || {})}
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        const message = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail || data);
+        throw new Error(message);
+      }
+      return data;
+    }
+
+    function setStatus(message, isError = false) {
+      $('formStatus').textContent = message;
+      $('formStatus').className = isError ? 'status error' : 'status';
+    }
+
+    function clearForm() {
+      $('employeeForm').reset();
+      editingId = null;
+      $('id').disabled = false;
+      $('saveButton').textContent = 'Add Employee';
+      setStatus('');
+    }
+
+    function cell(text) {
+      const td = document.createElement('td');
+      td.textContent = String(text);
+      return td;
+    }
+
+    async function loadEmployees() {
+      try {
+        employees = await api('/api/employees');
+        const tbody = $('employeeRows');
+        tbody.replaceChildren();
+        if (!employees.length) {
+          const row = document.createElement('tr');
+          const td = cell('No employees yet. Add one using the form or chatbot.');
+          td.colSpan = 6;
+          row.append(td);
+          tbody.append(row);
+          return;
+        }
+        employees.forEach(emp => {
+          const row = document.createElement('tr');
+          row.append(cell(emp.id), cell(emp.name), cell(emp.age), cell('₹' + emp.salary), cell(emp.desig));
+          const actions = document.createElement('td');
+          const edit = document.createElement('button');
+          edit.textContent = 'Edit'; edit.className = 'small secondary';
+          edit.addEventListener('click', () => {
+            editingId = emp.id;
+            ['id', 'name', 'age', 'salary', 'desig'].forEach(key => {$(key).value = emp[key];});
+            $('id').disabled = true;
+            $('saveButton').textContent = 'Update Employee';
+            setStatus('Editing employee ' + emp.id);
+            $('name').focus();
+          });
+          const remove = document.createElement('button');
+          remove.textContent = 'Delete'; remove.className = 'small danger';
+          remove.addEventListener('click', async () => {
+            if (!window.confirm('Delete employee ' + emp.id + ' (' + emp.name + ')?')) return;
+            try {
+              await api('/api/employees/' + emp.id, {method: 'DELETE'});
+              if (editingId === emp.id) clearForm();
+              setStatus('Employee ' + emp.id + ' deleted.');
+              await loadEmployees();
+            } catch (err) {setStatus(err.message, true);}
+          });
+          actions.append(edit, remove); row.append(actions); tbody.append(row);
+        });
+      } catch (err) {setStatus('Cannot load records: ' + err.message, true);}
+    }
+
+    $('employeeForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const employee = {
+        id: Number($('id').value), name: $('name').value.trim(),
+        age: Number($('age').value), salary: Number($('salary').value),
+        desig: $('desig').value.trim()
+      };
+      try {
+        if (editingId === null) {
+          await api('/api/employees', {method: 'POST', body: JSON.stringify(employee)});
+          clearForm(); setStatus('Employee added successfully.');
+        } else {
+          const id = editingId;
+          await api('/api/employees/' + id, {
+            method: 'PUT',
+            body: JSON.stringify({name: employee.name, age: employee.age, salary: employee.salary, desig: employee.desig})
+          });
+          clearForm(); setStatus('Employee ' + id + ' updated successfully.');
+        }
+        await loadEmployees();
+      } catch (err) {setStatus(err.message, true);}
+    });
+    $('clearButton').addEventListener('click', clearForm);
+    $('refreshButton').addEventListener('click', loadEmployees);
+
+    function addChatMessage(role, message) {
+      const bubble = document.createElement('div');
+      bubble.className = 'msg ' + role;
+      bubble.textContent = message; // textContent avoids injecting model-provided HTML
+      $('chatMessages').append(bubble);
+      $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
+    }
+
+    function setBusy(value) {
+      busy = value;
+      $('sendButton').disabled = value || !!pendingToken;
+      $('chatInput').disabled = value || !!pendingToken;
+    }
+
+    function showConfirmation(pending) {
+      pendingToken = pending.token;
+      setBusy(false);
+      const panel = document.createElement('div');
+      panel.className = 'confirm-box';
+      const heading = document.createElement('strong');
+      heading.textContent = 'Confirm: ' + pending.action;
+      const details = document.createElement('pre');
+      details.textContent = JSON.stringify(pending.details, null, 2);
+      const buttons = document.createElement('div');
+      buttons.className = 'buttons';
+      const accept = document.createElement('button');
+      accept.className = 'success'; accept.textContent = 'Confirm';
+      const reject = document.createElement('button');
+      reject.className = 'danger'; reject.textContent = 'Cancel';
+      buttons.append(accept, reject); panel.append(heading, details, buttons);
+      $('confirmArea').replaceChildren(panel);
+      async function resolve(approve) {
+        accept.disabled = true; reject.disabled = true;
+        try {
+          const answer = await api('/api/chat/confirm', {
+            method: 'POST', body: JSON.stringify({token: pendingToken, approve})
+          });
+          addChatMessage('assistant', answer.reply);
+          history.push({role: 'assistant', content: answer.reply});
+          await loadEmployees();
+        } catch (err) {addChatMessage('assistant', 'Error: ' + err.message);}
+        finally {
+          pendingToken = null;
+          $('confirmArea').replaceChildren();
+          setBusy(false); $('chatInput').focus();
+        }
+      }
+      accept.addEventListener('click', () => resolve(true));
+      reject.addEventListener('click', () => resolve(false));
+    }
+
+    $('chatForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (busy || pendingToken) return;
+      const message = $('chatInput').value.trim();
+      if (!message) return;
+      $('chatInput').value = '';
+      addChatMessage('user', message);
+      setBusy(true);
+      try {
+        const answer = await api('/api/chat', {
+          method: 'POST',
+          body: JSON.stringify({message, history: history.slice(-12)})
+        });
+        addChatMessage('assistant', answer.reply);
+        history.push({role: 'user', content: message}, {role: 'assistant', content: answer.reply});
+        history = history.slice(-12);
+        if (answer.pending) showConfirmation(answer.pending);
+      } catch (err) {
+        addChatMessage('assistant', 'Error: ' + err.message);
+      } finally {setBusy(false);}
+    });
+
+    addChatMessage('assistant', 'Hello! I can search employees and propose add, edit or delete operations. Database changes through chat require your confirmation.');
+    loadEmployees();
+  </script>
+</body>
+
+</html>

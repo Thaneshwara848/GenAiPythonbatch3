@@ -1,0 +1,298 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee AI - MySQL Tool Calling</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            margin: 0;
+            padding: 25px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #1d4ed8;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #ddd;
+            min-width: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #2563eb;
+            color: white;
+        }
+
+        #chatBox {
+            height: 350px;
+            overflow-y: auto;
+            background: #f8fafc;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+
+        .user {
+            background: #dbeafe;
+        }
+
+        .bot {
+            background: #dcfce7;
+        }
+
+        .inputRow {
+            display: flex;
+            gap: 8px;
+        }
+
+        input {
+            flex: 1;
+            min-width: 0;
+            padding: 12px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: #2563eb;
+            color: white;
+            border: 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #refreshBtn {
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Employee AI Tool Calling - MySQL</h2>
+
+<div class="container">
+
+    <!-- LEFT SIDE: MYSQL DATA -->
+    <div class="panel">
+
+        <h3>MySQL Employee Records</h3>
+
+        <button id="refreshBtn" onclick="loadEmployees()">
+            Refresh Employees
+        </button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Salary</th>
+                    <th>Designation</th>
+                </tr>
+            </thead>
+
+            <tbody id="employeeTable"></tbody>
+        </table>
+
+    </div>
+
+    <!-- RIGHT SIDE: AI CHATBOT -->
+    <div class="panel">
+
+        <h3>AI Employee Chatbot</h3>
+
+        <div id="chatBox"></div>
+
+        <form class="inputRow" id="chatForm">
+            <input
+                type="text"
+                id="message"
+                placeholder="Ask AI about employees..."
+                required
+            >
+
+            <button type="submit" id="sendBtn">
+                Send
+            </button>
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+    const chatBox = document.getElementById("chatBox");
+
+    // 1. Load employee records from MySQL
+    async function loadEmployees() {
+
+        const tbody = document.getElementById("employeeTable");
+
+        try {
+            const response = await fetch("/employees");
+
+            if (!response.ok) {
+                throw new Error("Unable to load employees");
+            }
+
+            const employees = await response.json();
+
+            tbody.innerHTML = "";
+
+            employees.forEach(emp => {
+
+                const tr = document.createElement("tr");
+
+                [
+                    emp.id,
+                    emp.name,
+                    emp.age,
+                    emp.salary,
+                    emp.desig
+                ].forEach(value => {
+
+                    const td = document.createElement("td");
+                    td.textContent = value;
+                    tr.appendChild(td);
+
+                });
+
+                tbody.appendChild(tr);
+
+            });
+
+        } catch (error) {
+            tbody.innerHTML =
+                "<tr><td colspan='5'>Unable to load employees</td></tr>";
+        }
+    }
+
+
+    // 2. Add chatbot message
+    function addMessage(text, type) {
+
+        const div = document.createElement("div");
+
+        div.className = "message " + type;
+
+        div.textContent = text;
+
+        chatBox.appendChild(div);
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+
+    // 3. Send user message to FastAPI
+    document.getElementById("chatForm")
+        .addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const input = document.getElementById("message");
+            const button = document.getElementById("sendBtn");
+
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            addMessage("You: " + message, "user");
+
+            input.value = "";
+            button.disabled = true;
+
+            try {
+
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Chat request failed");
+                }
+
+                const data = await response.json();
+
+                addMessage("AI: " + data.reply, "bot");
+
+            } catch (error) {
+
+                addMessage(
+                    "Error: Unable to contact AI backend",
+                    "bot"
+                );
+
+            } finally {
+
+                button.disabled = false;
+
+                // Refresh table after AI response
+                await loadEmployees();
+            }
+
+        });
+
+
+    // 4. Initial page load
+    loadEmployees();
+
+</script>
+
+</body>
+</html>
