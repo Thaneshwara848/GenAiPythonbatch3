@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Single AI Agent</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
+      margin: 0;
+      padding: 24px;
+      color: #1e293b;
+    }
+
+    h2 {
+      text-align: center;
+      color: #1d4ed8;
+      margin: 0 0 22px;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .panel {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px #dce2eb;
+      min-width: 0;
+    }
+
+    h3 {
+      margin-top: 0;
+    }
+
+    .tableWrap {
+      max-height: 435px;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #2563eb;
+      color: white;
+      position: sticky;
+      top: 0;
+    }
+
+    #chatBox {
+      height: 350px;
+      overflow-y: auto;
+      background: #f8fafc;
+      border: 1px solid #ddd;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .user {
+      background: #dbeafe;
+    }
+
+    .bot {
+      background: #dcfce7;
+    }
+
+    .error {
+      background: #fee2e2;
+    }
+
+    .inputRow {
+      display: flex;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px 15px;
+      background: #2563eb;
+      color: white;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    #refreshBtn {
+      margin-bottom: 15px;
+    }
+
+    .confirmCard {
+      border: 1px solid #f59e0b;
+      border-radius: 9px;
+      background: #fffbeb;
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    .confirmCard h4 {
+      margin: 0 0 8px;
+    }
+
+    .confirmCard pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .approve {
+      background: #15803d;
+    }
+
+    .cancel {
+      background: #b91c1c;
+    }
+
+    .small {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    @media(max-width:800px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Employee Single AI Agent - MySQL</h2>
+  <div class="container">
+    <div class="panel">
+      <h3>MySQL Employee Records</h3>
+      <button id="refreshBtn" onclick="loadEmployees()">Refresh Employees</button>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Salary</th>
+              <th>Designation</th>
+            </tr>
+          </thead>
+          <tbody id="employeeTable"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Single AI Agent Chatbot</h3>
+      <div id="chatBox" role="log" aria-live="polite"></div>
+      <form class="inputRow" id="chatForm">
+        <input id="message" type="text" placeholder="Ask your employee agent..." required>
+        <button id="sendBtn" type="submit">Send</button>
+      </form>
+      <p class="small">Adding, updating, or deleting employees always requires confirmation.</p>
+    </div>
+  </div>
+  <script>
+    const chatBox = document.getElementById('chatBox');
+    const sendBtn = document.getElementById('sendBtn');
+    const messageInput = document.getElementById('message');
+    let pendingToken = null;
+
+    async function loadEmployees() {
+      const tbody = document.getElementById('employeeTable');
+      try {
+        const response = await fetch('/employees');
+        if (!response.ok) throw new Error('Unable to load employees');
+        const employees = await response.json();
+        tbody.replaceChildren();
+        if (!employees.length) {
+          const row = tbody.insertRow();
+          const cell = row.insertCell();
+          cell.colSpan = 5;
+          cell.textContent = 'No employees found';
+        }
+        for (const emp of employees) {
+          const row = tbody.insertRow();
+          for (const value of [emp.id, emp.name, emp.age, emp.salary, emp.desig]) {
+            row.insertCell().textContent = value ?? '';
+          }
+        }
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="5">Unable to load employees</td></tr>';
+      }
+    }
+
+    function addMessage(text, type = 'bot') {
+      const div = document.createElement('div');
+      div.className = 'message ' + type;
+      div.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function setBusy(busy) {
+      sendBtn.disabled = busy || !!pendingToken;
+      messageInput.disabled = busy || !!pendingToken;
+    }
+
+    function showConfirmation(data) {
+      pendingToken = data.confirmation_token;
+      setBusy(false);
+      const card = document.createElement('div');
+      card.className = 'confirmCard';
+      const heading = document.createElement('h4');
+      heading.textContent = 'Confirmation Required';
+      card.appendChild(heading);
+      const description = document.createElement('div');
+      const actionNames = {
+        add_employee: 'Add employee',
+        update_employee_salary: 'Update salary',
+        delete_employee: 'Delete employee'
+      };
+      description.textContent = actionNames[data.action] || data.action;
+      card.appendChild(description);
+      const details = document.createElement('pre');
+      details.textContent = JSON.stringify(data.details, null, 2);
+      card.appendChild(details);
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      const confirm = document.createElement('button');
+      confirm.className = 'approve';
+      confirm.textContent = 'Yes, Confirm';
+      confirm.type = 'button';
+      const cancel = document.createElement('button');
+      cancel.className = 'cancel';
+      cancel.textContent = 'Cancel';
+      cancel.type = 'button';
+      actions.append(confirm, cancel);
+      card.appendChild(actions);
+      chatBox.appendChild(card);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      confirm.onclick = () => submitConfirmation(true, card);
+      cancel.onclick = () => submitConfirmation(false, card);
+    }
+
+    async function submitConfirmation(approved, card) {
+      const token = pendingToken;
+      if (!token) return;
+      card.querySelectorAll('button').forEach(button => button.disabled = true);
+      try {
+        const response = await fetch('/agent/confirm', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({confirmation_token: token, approved})
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'Confirmation failed');
+        addMessage('Agent: ' + data.reply);
+        card.remove();
+        pendingToken = null;
+        await loadEmployees();
+      } catch (error) {
+        addMessage('Error: ' + error.message, 'error');
+        // Token may have been consumed by the server; clear the UI so user can retry via chat.
+        card.remove();
+        pendingToken = null;
+      } finally {
+        setBusy(false);
+        messageInput.focus();
+      }
+    }
+
+    document.getElementById('chatForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      if (pendingToken) return;
+      const message = messageInput.value.trim();
+      if (!message) return;
+      addMessage('You: ' + message, 'user');
+      messageInput.value = '';
+      setBusy(true);
+      try {
+        const response = await fetch('/agent/chat', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({message})
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'Chat request failed');
+        addMessage('Agent: ' + data.reply);
+        if (data.confirmation_required) showConfirmation(data);
+        else await loadEmployees();
+      } catch (error) {
+        addMessage('Error: ' + error.message, 'error');
+      } finally {
+        setBusy(false);
+        if (!pendingToken) messageInput.focus();
+      }
+    });
+    loadEmployees();
+  </script>
+</body>
+
+</html>
