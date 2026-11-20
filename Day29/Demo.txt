@@ -1,0 +1,65 @@
+N8N : No code automation ..../ less code / minimal coding
+ 
+	n8n is a workflow automation tool used in Generative AI
+	to connect LLMs, AI agents, databases, APIs, and external applications to automate 
+		real-world business processes with minimal coding.
+
+
+2. Real-time GenAI use cases with n8n
+Project	How n8n + GenAI works
+
+
+1. AI Email Assistant				Read emails → AI generates reply → Gmail sends it
+2. AI Chatbot					User asks → LLM processes → Responds
+3. Resume Screening				Upload resume → AI extracts skills → Google Sheets
+4. Document Summarizer				Upload PDF → AI summarizes → Email
+5. RAG Chatbot	User question → 		Vector DB search → LLM answer
+6. AI Customer Support				Customer message → AI agent → Support response
+7. Employee AI Agent				User prompt → AI selects tool → FastAPI/MySQL
+8. Sentiment Analysis				Customer feedback → AI analyzes sentiment → Store result
+9. Smart Meeting Assistant			Meeting notes → AI summary → Email tasks
+10. Student Assessment				Student answer → AI evaluates → Feedback
+
+
+
+n8n = Nod emation (Node + Automation).
+
+1 ) N8n : Nodemation
+	N8n 
+
+	1 ) Schedule Trigger 
+				
+
+	
+
+
+
+
+2 ) i18n:
+	Internationalization
+	I18n
+
+3 )L10n :
+	Localization.
+	L10n
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

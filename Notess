@@ -47,6 +47,63 @@ Python -------------------- Database
 
 
 
+Project 1 )
+		1 ) Daily Training Reminder
+
+			Automatically send students a reminder email every morning at 9 AM.
+				1 ) Schedule Trigger → Gmail Send				: we have done this examples 
+				2 ) Schedule Trigger → Telegram Send				: task 1 
+				3 ) Schedule Trigger → WhatsApp Send				: task 2 
+
+		2 ) Student Marks – Pass/Fail Email
+
+			Read student marks, check whether marks are at least 40, and send a PASS or FAIL email.
+				Google Sheets Trigger → IF → Gmail
+
+		3 ) Automatic Birthday Wishes
+
+			Read student birthdays from Google Sheets and send personalized wishes on the correct date.
+
+				Schedule → Google Sheets → IF → Gmail
+		
+
+		4 ) Leave Approval System (HITL)
+				Form Trigger → Gmail Approval (HITL) → IF → Approved Email / Rejected Email
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
