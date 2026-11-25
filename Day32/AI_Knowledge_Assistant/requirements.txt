@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
+mysql-connector-python
+openai
+chromadb
+sentence-transformers
+pypdf
+python-docx

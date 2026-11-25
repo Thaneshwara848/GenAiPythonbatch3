@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Knowledge Assistant</title>
+
+    <link rel="stylesheet"
+          href="/static/style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>AI Personal Knowledge Assistant</h1>
+        <p>FastAPI | RAG | ChromaDB | AI Agent</p>
+    </header>
+
+    <div class="container">
+
+        <!-- Dashboard Statistics -->
+
+        <section class="stats">
+
+            <div class="stat-card">
+                <h3>Total Documents</h3>
+                <h2 id="documentCount">0</h2>
+            </div>
+
+            <div class="stat-card">
+                <h3>Vector Chunks</h3>
+                <h2 id="chunkCount">0</h2>
+            </div>
+
+            <div class="stat-card">
+                <h3>Agent Tools</h3>
+                <h2>3</h2>
+            </div>
+
+        </section>
+
+
+        <main class="dashboard">
+
+            <!-- Left Side -->
+
+            <section class="panel">
+
+                <h2>Document Management</h2>
+
+                <div class="upload-box">
+
+                    <h3>Upload Document</h3>
+
+                    <p>PDF, DOCX or TXT — Max 10 MB</p>
+
+                    <input
+                        type="file"
+                        id="fileInput"
+                        accept=".pdf,.docx,.txt"
+                    >
+
+                    <button
+                        id="uploadBtn"
+                        onclick="uploadDocument()">
+
+                        Upload Document
+
+                    </button>
+
+                    <p id="uploadStatus"
+                       role="status"></p>
+
+                </div>
+
+                <h3>Uploaded Documents</h3>
+
+                <div id="documentList">
+
+                    <p>No documents uploaded.</p>
+
+                </div>
+
+            </section>
+
+
+            <!-- Right Side -->
+
+            <section class="panel chat-panel">
+
+                <h2>Knowledge Chat</h2>
+
+                <div class="mode-buttons">
+
+                    <button
+                        id="ragBtn"
+                        class="active"
+                        onclick="setMode('rag')">
+
+                        RAG Chat
+
+                    </button>
+
+                    <button
+                        id="agentBtn"
+                        onclick="setMode('agent')">
+
+                        AI Agent
+
+                    </button>
+
+                </div>
+
+                <div id="chatBox"
+                     aria-live="polite">
+
+                    <div class="message assistant">
+
+                        Welcome! Upload a document
+                        and start asking questions.
+
+                    </div>
+
+                </div>
+
+                <div class="question-box">
+
+                    <input
+                        type="text"
+                        id="questionInput"
+                        maxlength="2000"
+                        placeholder="Ask a question..."
+                    >
+
+                    <button
+                        id="sendBtn"
+                        onclick="askQuestion()">
+
+                        Send
+
+                    </button>
+
+                </div>
+
+                <button
+                    class="history-btn"
+                    onclick="loadHistory()">
+
+                    View Chat History
+
+                </button>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <script src="/static/script.js"></script>
+
+</body>
+
+</html>
