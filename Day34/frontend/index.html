@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wanderwise | Travel planner</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/">✦ <span>Wanderwise</span></a><span class="tag">YOUR TRAVEL COMPANION</span><span id="identity">Browsing as guest</span></header>
+  <main>
+    <section class="hero"><div><p class="eyebrow">GO SOMEWHERE WONDERFUL</p><h1>Your next story<br><em>starts here.</em></h1><p>Discover thoughtfully curated escapes, plan with AI, and keep every journey in one place.</p><a class="button light" href="#explore">Explore destinations <span>↗</span></a></div><div class="hero-art" aria-hidden="true"><div class="sun"></div><div class="mountain back"></div><div class="mountain front"></div><span class="hero-caption">MADE FOR THE CURIOUS</span></div></section>
+    <section class="login-panel">
+      <div><p class="eyebrow">YOUR ACCOUNT</p><h2>Welcome, traveller.</h2><p>Sign in to book and chat. Your credentials stay in this browser session.</p></div>
+      <form id="login-form"><label>Username<input name="username" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button>Sign in</button><button type="button" class="secondary" id="logout">Sign out</button></form>
+    </section>
+    <div id="notice" role="status" aria-live="polite"></div>
+    <section id="explore" class="section"><div class="section-heading"><div><p class="eyebrow">FIND YOUR ESCAPE</p><h2>Explore destinations</h2></div><p>Fictional trips. Real inspiration.</p></div>
+      <form id="filters" class="filters"><label>Destination<input name="destination" placeholder="Where to?"></label><label>Maximum budget (₹)<input name="max_price" type="number" min="1" placeholder="Any budget"></label><label>Duration (days)<input name="duration_days" type="number" min="1" placeholder="Any length"></label><button>Search trips</button></form>
+      <div id="packages" class="cards"></div>
+    </section>
+    <section class="section"><div class="section-heading"><div><p class="eyebrow">YOUR ADVENTURES</p><h2>My bookings</h2></div><button id="refresh-bookings" class="secondary">Refresh</button></div><div id="bookings" class="list"><p>Sign in to see your bookings.</p></div></section>
+    <section id="admin" class="section hidden"><div class="section-heading"><div><p class="eyebrow">ADMINISTRATION</p><h2>Manage your catalog</h2></div></div>
+      <form id="package-form" class="filters admin-form"><label>Package ID (edit)<input name="id" type="number" min="1" placeholder="New package"></label><label>Title<input name="title" minlength="3" maxlength="120" required></label><label>Destination<input name="destination" required></label><label>Days<input name="duration_days" type="number" min="1" required></label><label>Price (₹)<input name="price" type="number" min="0.01" step="0.01" required></label><label>Available seats<input name="capacity" type="number" min="0" required></label><label>Departure<input name="start_date" type="date" required></label><button>Save package</button></form>
+      <form id="upload-form" class="upload"><label>Index a policy document (PDF, DOCX, TXT; max 5 MB)<input type="file" name="file" accept=".pdf,.docx,.txt" required></label><button class="secondary">Upload &amp; index</button></form>
+    </section>
+    <section class="section chat-section"><div class="section-heading"><div><p class="eyebrow">ASK AWAY</p><h2>Meet your travel assistant</h2><p>Ideas, policies and bookings, all in one conversation.</p></div></div>
+      <div class="chat-layout"><aside><button id="new-chat">+ New conversation</button><div id="sessions"></div></aside><div class="chat-main"><div id="messages" class="messages" aria-live="polite"><p>Sign in and start a conversation.</p></div><form id="chat-form"><label class="sr-only" for="chat-input">Your message</label><input id="chat-input" maxlength="4000" placeholder="Ask about your next trip..." required><button>Send ↗</button></form><small id="chat-loading" class="hidden">Thinking…</small></div></div>
+    </section>
+  </main><footer><span>✦ Wanderwise</span><span>A fictional travel experience · No real payments</span></footer>
+  <script src="/static/script.js"></script>
+</body>
+</html>

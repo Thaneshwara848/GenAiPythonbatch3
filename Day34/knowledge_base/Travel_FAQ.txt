@@ -1,0 +1,4 @@
+FICTIONAL TRAVEL FAQ | Version 1 | Effective 2026-01-01
+Can I make a reservation without payment? Yes. This demo records simulated bookings only.
+Can I cancel a booking? Confirmed future bookings can be cancelled by their owner; the refund depends on departure date.
+How do I check availability? Search the package catalog or ask the assistant to check the current available seats.

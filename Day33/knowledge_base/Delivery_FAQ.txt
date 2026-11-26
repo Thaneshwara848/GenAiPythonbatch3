@@ -1,0 +1,2 @@
+FICTIONAL DELIVERY FAQ | Version 1 | Effective 2026-01-01
+Delivery is simulated. Order statuses are CONFIRMED, PREPARING, OUT_FOR_DELIVERY, DELIVERED, or CANCELLED. No real courier is dispatched, and no delivery time is guaranteed.

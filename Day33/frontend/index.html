@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plate &amp; Pal | Food AI</title>
+  <link rel="stylesheet" href="/static/style.css?v=2">
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo">P</span><div><strong>Plate &amp; Pal</strong><small>YOUR FOOD, SORTED.</small></div></div>
+  <div class="header-right"><span class="demo">FICTIONAL DEMO</span><span id="identity">Browsing as guest</span><button id="logout" class="quiet" hidden>Sign out</button></div>
+</header>
+<main>
+  <section class="hero"><div><p class="eyebrow">GOOD FOOD, GOOD COMPANY</p><h1>A little help with<br><em>what's for dinner.</em></h1><p>Explore the menu, place a simulated order, or ask your AI dining companion.</p><a href="#menu" class="button">Explore the menu &darr;</a></div><div class="hero-art" aria-hidden="true"><div class="plate"><span>✦</span><strong>fresh<br>ideas</strong><small>made for you</small></div></div></section>
+  <div id="notice" role="status" aria-live="polite"></div>
+  <section class="layout">
+    <div>
+      <section id="menu"><div class="section-head"><div><p class="eyebrow">THE GOOD STUFF</p><h2>Explore our menu</h2></div><span class="muted">Prices in INR · portions are live</span></div>
+        <form id="filters" class="filters"><label>Search<input name="keyword" placeholder="Find a dish"></label><label>Category<input name="category" placeholder="All categories"></label><label>Max price<input name="max_price" type="number" min="1" placeholder="Any price"></label><label class="check"><input name="vegetarian" type="checkbox"> Vegetarian only</label><button>Apply</button></form>
+        <div id="menu-grid" class="menu-grid"></div>
+      </section>
+      <section class="card section"><div class="section-head"><div><p class="eyebrow">YOUR SELECTION</p><h2>Order basket</h2></div></div><div id="basket" class="muted">Your basket is empty.</div><button id="place-order">Place simulated order</button></section>
+      <section class="card section"><div class="section-head"><div><p class="eyebrow">KEEPING TRACK</p><h2>My orders</h2></div><button id="refresh-orders" class="quiet">Refresh</button></div><div id="orders" class="muted">Sign in to see your orders.</div></section>
+      <section id="admin" class="card section" hidden><p class="eyebrow">RESTAURANT CONTROL</p><h2>Admin tools</h2>
+        <form id="item-form" class="admin-form"><input name="id" type="number" min="1" placeholder="ID (for update/disable)"><input name="title" placeholder="Item name" minlength="3" maxlength="120"><input name="category" placeholder="Category"><input name="price" type="number" min="0.01" step="0.01" placeholder="Price"><input name="capacity" type="number" min="0" placeholder="Portions"><label class="check"><input name="vegetarian" type="checkbox"> Vegetarian</label><label class="check"><input name="active" type="checkbox" checked> Active</label><div><button type="submit">Create</button> <button type="button" id="update-item" class="quiet">Update</button> <button type="button" id="disable-item" class="quiet">Disable</button></div></form>
+        <form id="status-form" class="inline"><label>Order ID<input name="id" type="number" min="1" required></label><label>New status<select name="status"><option>PREPARING</option><option>OUT_FOR_DELIVERY</option><option>DELIVERED</option></select></label><button>Update status</button></form>
+        <form id="upload-form" class="inline"><label>Policy document (PDF, DOCX, TXT; max 5 MB)<input name="file" type="file" accept=".pdf,.docx,.txt" required></label><button>Upload &amp; index</button></form>
+      </section>
+    </div>
+    <aside>
+      <section id="login-card" class="card"><p class="eyebrow">WELCOME BACK</p><h2>Sign in</h2><p class="muted">Sign in to order and chat. Credentials stay in memory only.</p><form id="login-form"><label>Username<input name="username" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button>Sign in</button></form><p class="hint">Demo accounts are listed in the README.</p></section>
+      <section class="card chat-card"><div class="section-head"><div><p class="eyebrow">ASK AWAY</p><h2>Meet your food pal <span class="spark">✳</span></h2></div></div><p class="muted">Menu questions, policy answers and a hand with your order.</p>
+        <div class="inline"><label class="grow">Conversation<select id="sessions"><option value="">Select a conversation</option></select></label><button id="new-session" class="quiet">+ New</button></div>
+        <div id="messages" class="messages" aria-live="polite"><div class="empty">Sign in and start a conversation.</div></div>
+        <div id="actions"></div>
+        <form id="chat-form" class="chat-input"><label class="sr-only" for="chat-message">Message</label><textarea id="chat-message" maxlength="4000" rows="2" placeholder="Ask me anything about the menu..." required></textarea><button>Send &uarr;</button></form><p class="hint">AI can make mistakes. Allergen cross-contact cannot be ruled out.</p>
+      </section>
+    </aside>
+  </section>
+</main>
+<footer>Plate &amp; Pal · A fictional capstone demo · No real payment or delivery</footer>
+<script src="/static/script.js"></script>
+</body>
+</html>
